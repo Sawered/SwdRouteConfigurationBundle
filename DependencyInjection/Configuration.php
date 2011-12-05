@@ -23,7 +23,35 @@ class Configuration implements ConfigurationInterface
         // Here you should define the parameters that are allowed to
         // configure your bundle. See the documentation linked above for
         // more information on that topic.
-
+        $rootNode
+            ->children()
+                ->arrayNode('cache')
+                    ->canBeUnset()
+                    ->treatNullLike(array('enabled' => true))
+                    ->treatTrueLike(array('enabled' => true))
+                    ->children()
+                        ->booleanNode('enabled')->defaultTrue()->end()
+                    ->end()
+                ->end()
+                ->arrayNode('by_route')
+                    ->canBeUnset()
+                    ->useAttributeAsKey('name')
+                    ->prototype('array')
+                    ->children()
+                        ->scalarNode('match')->defaultValue("prefix")->end()
+                        ->arrayNode('params')
+                            ->isRequired()
+                            ->useAttributeAsKey('name')
+                            ->prototype('scalar')->end()
+                        ->end()
+                        ->arrayNode('bundles')
+                            ->canBeUnset()
+                            ->prototype('scalar')->end()
+                        ->end()
+                    ->end()
+                ->end()
+            ->end()
+        ;
         return $treeBuilder;
     }
 }

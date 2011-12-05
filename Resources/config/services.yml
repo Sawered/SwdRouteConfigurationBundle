@@ -1,13 +1,32 @@
 parameters:
-    swd_route_configuration.class: Swd\Bundle\RouteConfigurationBundle\EventListener\RouterListener
+    swd_route_configuration.route_listener.class: Swd\Bundle\RouteConfigurationBundle\EventListener\RouterListener
+    swd_route_configuration.extension.twig.class: Swd\Bundle\RouteConfigurationBundle\Twig\Extension\RouteConfigExtension
+    swd_route_configuration.configurator.class:   Swd\Bundle\RouteConfigurationBundle\Configurator\RouteConfigurator
+    swd_route_configuration.configurator.options: ~
 
 services:
     swd_route_configuration.router_listener:
-        class: %swd_route_configuration.class%
+        class: %swd_route_configuration.route_listener.class%
         arguments: 
             router: @router
             logger: @logger
         tags: 
             - { name: "kernel.event_listener", event: "kernel.request", method:"onKernelRequest" }
             - { name: "monolog.logger", channel: "request" }
+
+    swd_route_configuration.twig.extension:
+        class: %swd_route_configuration.extension.twig.class%
+        arguments: 
+            route_config: @route_configurator
+        tags:
+            - { name: "twig.extension" }
+
+
+    swd_route_configuration.configurator:
+        class: %swd_route_configuration.configurator.class%
+        arguments:  [%swd_route_configuration.configurator.options%]
             
+        
+
+    route_configurator:
+        alias: swd_route_configuration.configurator
