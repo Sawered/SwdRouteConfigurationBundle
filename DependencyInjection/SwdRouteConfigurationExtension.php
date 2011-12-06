@@ -25,9 +25,14 @@ class SwdRouteConfigurationExtension extends Extension
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
 
-
-        //load parse config
-        //cache
-        $container->setParameter("swd_route_configuration.configurator.options",$config);
+        //var_export($config["by_route"]);exit();
+        $parser  = new RouteConfigParser();
+        $parsed_config = array();
+        if(isset($config["by_route"])){
+            $parser->parseByRoute($config["by_route"]);
+            $parsed_config =  $parser->getResult();
+        }
+        //var_export($parsed_config);
+        $container->setParameter("swd_route_configuration.configurator.route_config",$parsed_config);
     }
 }
