@@ -18,14 +18,14 @@ services:
     swd_route_configuration.twig.extension:
         class: %swd_route_configuration.extension.twig.class%
         arguments: 
-            route_config: @route_configurator
+            container: @service_container
         tags:
             - { name: "twig.extension" }
 
 
     swd_route_configuration.configurator:
         class: %swd_route_configuration.configurator.class%
-        arguments:  [@router,%swd_route_configuration.configurator.route_config%,%swd_route_configuration.configurator.options%]
+        arguments:  [@service_container,%swd_route_configuration.configurator.route_config%,%swd_route_configuration.configurator.options%]
             
         
 

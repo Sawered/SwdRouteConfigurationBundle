@@ -9,19 +9,20 @@
 
 namespace Swd\Bundle\RouteConfigurationBundle\Configurator;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 
 class RouteConfigurator
 {
     private $rc_config;
-    private $router;
+    private $container;
     private $current_route;
     private $current_url;
     private $resolved_routes = array();
 
-    public function __construct(RouterInterface $router,$route_configuration = array(),$options = array())
+    public function __construct(ContainerInterface $container,$route_configuration = array(),$options = array())
     {
-        $this->router = $router;
+        $this->container = $container;
         $this->rc_config = $route_configuration;
         if(isset($options["url"])) $this->setUrl($options["url"]);
         if(isset($options["route"])) $this->setRoute($options["route"]);
@@ -130,7 +131,7 @@ class RouteConfigurator
 
 
         foreach($routes as $route) {
-            $this->resolved_routes[$route] = $this->router->generate($route);
+            $this->resolved_routes[$route] = $this->container->get("router")->generate($route);
         }
 
         arsort($this->resolved_routes,SORT_STRING);

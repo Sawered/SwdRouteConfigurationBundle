@@ -9,15 +9,16 @@
 namespace Swd\Bundle\RouteConfigurationBundle\Twig\Extension;
 
 
-use Swd\Bundle\RouteConfigurationBundle\Configurator\RouteConfigurator;
+//use Swd\Bundle\RouteConfigurationBundle\Configurator\RouteConfigurator;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class RouteConfigExtension extends \Twig_Extension
 {
-    private $route_conf;
+    private $container;
 
-    public function __construct(RouteConfigurator $route_config)
+    public function __construct(ContainerInterface $container)
     {
-        $this->route_conf = $route_config;
+        $this->container = $container;
     }
 
     /**
@@ -34,7 +35,7 @@ class RouteConfigExtension extends \Twig_Extension
 
     public function getRouteParam($param,$default = null)
     {
-        return $this->route_conf->getParameter($param,$default);
+        return $this->container->get("route_configurator")->getParameter($param,$default);
     }
 
     public function getName()
