@@ -67,6 +67,7 @@ class RouteConfigurator
         if($resolved_route){
             $config = array_merge($config, $this->findRouteConfig($resolved_route,$rc_config["route_prefix"]));
         }
+        var_dump($config);
         $config = array_merge($config, $this->findRouteConfig($route,$rc_config["route_full"]));
 
         if(null != $bundle){
@@ -109,9 +110,9 @@ class RouteConfigurator
                 break;
             }
         }
-        //var_dump("findede_route");
-        //var_dump($prefix);
-        //var_dump($result);
+        var_dump("findede_route");
+        var_dump($prefix);
+        var_dump($result);
         return $result;
     }
 
@@ -134,8 +135,8 @@ class RouteConfigurator
             $this->resolved_routes[$route] = $this->container->get("router")->generate($route);
         }
 
-        arsort($this->resolved_routes,SORT_STRING);
-        //var_dump($this->resolved_routes);
+        asort($this->resolved_routes,SORT_STRING);
+        var_dump($this->resolved_routes);
     }
 
 
