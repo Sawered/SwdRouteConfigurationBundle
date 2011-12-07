@@ -22,23 +22,23 @@ class RouteConfigParser
     {
         foreach($route_configs as $config){
             if(empty($config["bundles"])){
-                if(isset($this->config["route_".$type][$route])){
-                    $this->config["route_".$type] =  array_merge($this->config["route_".$type][$route],$config["params"]);
-                }else{
-                    $this->config["route_".$type][$route] =  $config["params"];
-                }
-            }else{
-                foreach($config["bundles"] as $bundle){
-                    if(isset($this->config["bundle_route_".$type][$bundle]) &&
-                       isset($this->config["bundle_route_".$type][$bundle][$route])
-                      ){
-                        $this->config["bundle_route_".$type][$bundle][$route]
-                        =  array_merge( $this->config["bundle_route_".$type][$bundle][$route],$config["params"]);
-                    }else{
-                        $this->config["bundle_route_".$type][$bundle][$route] = $config["params"];
-                    }
-                }
+                if(!isset($this->config["common_confs"][$route]))
+                    $this->config["common_confs"][$route] = array();
 
+                $this->config["common_confs"][$route]["params"] = $config["params"];
+                $this->config["common_confs"][$route]["match"] = $type;
+            }else{
+                if(!isset($this->config["bundled_confs"][$route]))
+                    $this->config["bundled_confs"][$route] = array();
+                foreach($config["bundles"] as $bundle){
+                    if(!isset($this->config["bundled_confs"][$route][$bundle]))
+                        $this->config["bundled_confs"][$route][$bundle] = array();
+
+
+                    $this->config["bundled_confs"][$route][$bundle]["params"] = $config["params"];
+                    $this->config["bundled_confs"][$route][$bundle]["match"] = $type;
+
+                }
             }
         }
     }
@@ -51,10 +51,8 @@ class RouteConfigParser
     public function reset()
     {
         $this->config = array(
-            "bundle_route_full"   => array(),
-            "bundle_route_prefix" => array(),
-            "route_full"          => array(),
-            "route_prefix"        => array(),
+            "common_confs"  => array(),
+            "bundled_confs" => array(),
         );
     }
 }

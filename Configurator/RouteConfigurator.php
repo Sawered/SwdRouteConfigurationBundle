@@ -24,6 +24,7 @@ class RouteConfigurator
     {
         $this->container = $container;
         $this->rc_config = $route_configuration;
+
         if(isset($options["url"])) $this->setUrl($options["url"]);
         if(isset($options["route"])) $this->setRoute($options["route"]);
 
@@ -37,6 +38,7 @@ class RouteConfigurator
         list($bundle,$parameter) = $this->parseParam($param);
 
         $config =  $this->getConfig($bundle);
+
         if(array_key_exists($parameter,$config)){
             $result = $config[$parameter];
         }
@@ -55,64 +57,71 @@ class RouteConfigurator
         return $conf_cache[$key];
     }
 
-    public function findConfigFor($rc_config,$route,$url = null,$bundle = null)
+    public function findConfigFor($rc_config,$route /*deprecated (unused)*/,$url = null,$bundle = null)
     {
         $config = array();
-        $resolved_route = false;
+        $founded_route = false;
 
-        if(null != $url){
-            $resolved_route =  $this->findRouteByPath($url);
-        }
+        $founded_routes =  $this->findRoutesByPath($url);
+
         //if(!$resolved_route) $resolved_route = $this->current_route;
-        if($resolved_route){
-            $config = array_merge($config, $this->findRouteConfig($resolved_route,$rc_config["route_prefix"]));
-        }
-        var_dump($config);
-        $config = array_merge($config, $this->findRouteConfig($route,$rc_config["route_full"]));
+        if(!empty($founded_routes)){
+            $last = array_pop($founded_routes);
 
-        if(null != $bundle){
-            if($resolved_route){
-                $config = array_merge($config,$this->findBundleConfig($bundle,$resolved_route,$rc_config["bundle_route_prefix"]));
+            foreach($founded_routes as $route){
+                $config = array_merge($config,$this->findRouteConfig($route,"prefix"));
             }
-            $config = array_merge($config,$this->findBundleConfig($bundle,$route,$rc_config["bundle_route_full"]));
+            //last always merging
+            $config = array_merge($config,$this->findRouteConfig($last));
+
+            if(null != $bundle){
+
+                $config = array_merge($config,$this->findBundleConfig($bundle,$route,"prefix"));
+            }
+            //last always merging
+            $config = array_merge($config,$this->findBundleConfig($bundle,$last));
+
         }
+
         return $config;
 
     }
 
-    public function findRouteConfig($route,$config)
+    public function findRouteConfig($route,$type = false)
     {
         $result = array();
-
+        $config = $this->rc_config["common_confs"];
         if(array_key_exists($route,$config)){
-            $result = $config[$route];
+            if(false === $type || $config[$route]["match"] == $type)
+                $result = $config[$route]["params"];
         }
         return $result;
     }
 
-    public function findBundleConfig($bundle,$route,$config)
+    public function findBundleConfig($bundle,$route,$type = false)
     {
         $result = array();
-            if(array_key_exists($bundle,$config)){
-                if(array_key_exists($route,$config[$bundle])){
-                    $result = $config[$bundle][$route];
-                }
+        $config = $this->rc_config["bundled_confs"];
+        if(array_key_exists($route,$config)){
+            if(array_key_exists($bundle,$config[$route])){
+                if(false === $type || $config[$route][$bundle]["match"] == $type)
+                    $result = $config[$route][$bundle]["params"];
             }
+        }
         return $result;
     }
 
-    public function findRouteByPath($path)
+    public function findRoutesByPath($path)
     {
-        $result = false;
+        $result = array();
         foreach($this->resolved_routes as $route => $prefix){
             if(strpos($path,$prefix) === 0){
-                $result = $route;
-                break;
+                $result[] = $route;
             }
         }
-        var_dump("findede_route");
-        var_dump($prefix);
-        var_dump($result);
+        //var_dump("findede_route");
+        //var_dump($prefix);
+        //var_dump($result);
         return $result;
     }
 
@@ -120,15 +129,9 @@ class RouteConfigurator
     protected function resolvePrefixRoutes()
     {
         $routes = array();
-        foreach($this->rc_config["bundle_route_prefix"] as $bundle =>$route_confs) {
-            $routes =  array_merge($routes, array_keys($route_confs));
-        }
-        foreach($this->rc_config["bundle_route_full"] as $bundle =>$route_confs) {
-            $routes =  array_merge($routes, array_keys($route_confs));
-        }
 
-        $routes = array_merge($routes,array_keys($this->rc_config["route_prefix"]));
-        $routes = array_merge($routes,array_keys($this->rc_config["route_full"]));
+        $routes = array_merge($routes,array_keys($this->rc_config["common_confs"]));
+        $routes = array_merge($routes,array_keys($this->rc_config["bundled_confs"]));
 
 
         foreach($routes as $route) {
@@ -136,7 +139,7 @@ class RouteConfigurator
         }
 
         asort($this->resolved_routes,SORT_STRING);
-        var_dump($this->resolved_routes);
+        //var_dump($this->resolved_routes);
     }
 
 
@@ -158,5 +161,14 @@ class RouteConfigurator
         $this->current_url = $url;
     }
 
+    public function setRouteConfig($route_configuration)
+    {
+        $this->rc_config = $route_configuration;
+    }
+
+    public function setResolvedRoutes($resolved_routes)
+    {
+        $this->resolved_routes = $resolved_routes;
+    }
 
 }
