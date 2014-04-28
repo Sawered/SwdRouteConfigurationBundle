@@ -1,0 +1,18 @@
+{
+    "name": "swd/route-configuration-bundle",
+    "type": "symfony-bundle",
+    "version": "dev-master",
+    "description": "Route Configuration Bundle",
+    "license": "proprietary",
+    "autoload": {
+        "psr-0": {
+            "Swd\\Bundle\\RouteConfigurationBundle": "" 
+        }
+    },
+    "target-dir": "Swd/Bundle/RouteConfigurationBundle",
+
+    "require": {
+        "php":                            ">=5.3.2",
+        "symfony/framework-bundle": "~2.1"
+    }
+}
